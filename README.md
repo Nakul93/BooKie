@@ -1,23 +1,5 @@
-<p align="center">
-  <img src="https://socialify.git.ci/Nakul/BooKie/image?description=1&forks=1&language=1&owner=1&pattern=Plus&stargazers=1&theme=Dark">
-  <p align="center">
-    <a href="https://github.com/dhhruv/Vac-Cowin/blob/master/LICENSE">
-      <img src="https://img.shields.io/badge/license-MIT-informational">
-    </a>
-    <a href="https://www.python.org/">
-    	<img src="https://img.shields.io/badge/python-v3.8-informational">
-    </a>
-  </p>
-</p>
-<p align="center">
-	<img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
-</p>
-<p align="center">   
-	<a href="https://dev.to/dhhruv/book-cowin-vaccination-slots-directly-from-your-terminal-7nb">
-    	<img src="https://img.shields.io/badge/dev.to-0A0A0A?style=for-the-badge&logo=dev.to&logoColor=white">
-    </a>
-</p>
 
+## Introduction:
 
 BooKie is a automated python script which lets you book slots and download appointment slips for the same.
 
