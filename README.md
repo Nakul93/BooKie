@@ -18,9 +18,8 @@
     </a>
 </p>
 
-### DISCLAIMER
 
-**DUE TO LATEST CHANGES IN THE API ACCESS POLICY BY [MoHFW](https://www.mohfw.gov.in/pdf/CoWINAPIGuidelinesFinal240521.pdf), THERE WILL BE NO MORE COMMITS/CONTRIBUTIONS/RELEASES/MAINTENANCE IN THE PROJECT. THE PROJECT HAS BEEN PUT ON INDEFINITE HOLD. GRATEFUL TO EVERY CONTRIBUTORS, SUPPORTERS, USERS THAT WE COULD HELP YOU IN THE CRISIS. EVEN THOUGH YOU MAY STILL USE THE APP AFTER GOING THROUGH THE [T&C](https://www.cowin.gov.in/terms-condition), WE ADVISE NOT TO MISUSE IT, OTHERWISE YOU MIGHT FACE LEGAL ISSUES. USE IT AT YOUR OWN RISK.**
+BooKie is a automated python script which lets you book slots and download appointment slips for the same.
 
 ## Table of Contents:
 
@@ -37,176 +36,196 @@
 
   </ol>
 
-## Introduction
-
-**[CoWIN Portal](https://www.cowin.gov.in/home)** is used to self-register yourself for the **Vaccination** process in India. Here you can register yourself with your Phone Number and avail a slot from the available slots in various Vaccination Centres around the country.
-
-## About
-
-**VacCowin** is a CLI based Python Script that can be used to perform tasks such as OTP Generation till Vaccination Slot Booking from Co-WIN Platform directly from your Terminal.  This script rechecks after every few seconds and when the slots are available, it **confirms the slot only after you enter the captcha shown on the screen.**
-
-Since India has started the Vaccination Drive for those above 18 years of age, there is a very heavy rush and slots get booked soon. This script will come in handy for booking those slots as soon as they open.
-
-**IMPORTANT: This is a Proof of Concept (POC) Project. I OR the Team do NOT endorse or condone, in any shape or form, automating any monitoring/booking tasks. It's only made for Educational Purposes. Use this at your own risk.**
-
-The data used is retrieved using the open APIs at [API Setu](https://apisetu.gov.in/public/marketplace/api/cowin). It works on both Linux and Windows.
-
-## Getting Started
-
-1. Install Python
-2. Clone this repository...
-
-```sh
-git clone https://github.com/dhhruv/Vac-Cowin.git
-```
-
-**OR**
-Download the Zip and Extract the content.
-
-3. Install, create and activate virtual environment.
-   For instance we create a virtual environment named 'venv'.
-
-```sh
-pip install virtualenv
-python -m virtualenv venv
-venv\Scripts\activate.bat
-```
-
-4. Install dependencies
-
-```sh
-cd Vac-Cowin
-pip install -r requirements.txt
-```
-## How To Use
-
-1. Run the Script after performing the Initial Steps of [Getting Started](#getting-started):
-	`python VacCowin.py`
-2. Select the Beneficiaries. Read the Important notes. You can select multiple beneficiaries by providing comma-separated index values such as `1,2`:
-
-```
-Running VacCowin...
-Enter the Registered Mobile Number: ██████████
-Successfully Requested OTP for the Mobile Number ██████████ at 2021-05-23 09:28:41.669816..
-Enter OTP (If you do not recieve OTP in 2 minutes, Press Enter to Retry): ██████████
-Validating OTP. Please Wait...
-Token Generated: ██████████████████████████████████████████████████████████████████████
-
-Fetching the Registered Beneficiaries...
-+-------+----------------+---------------+-----------+-------+----------------------+
-|   idx |        bref_id | name          | vaccine   |   age | status               |
-+=======+================+===============+===========+=======+======================+
-|     1 | ██████████████ | █████████████ | ███████   |    ██ | ██████████████       |
-+-------+----------------+---------------+-----------+-------+----------------------+
-
-    ################# IMPORTANT THINGS TO BE REMEMBERED #################
-    
-    # 1. While selecting Beneficiaries, make sure that selected Beneficiaries are all taking the same dose: either their First OR Second.
-    #    Please do no try to club together booking for first dose for one Beneficiary and second dose for another Beneficiary. Recommended to do both seperately.
-    
-    # 2. While selecting Beneficiaries, also make sure that Beneficiaries selected for second dose are all taking the same vaccine: COVISHIELD OR COVAXIN OR SPUTNIK V.
-    #    Please do no try to club together booking for Beneficiary taking COVISHIELD with Beneficiary taking COVAXIN and other possibilities.
-    
-    # 3. If you're selecting multiple Beneficiaries, make sure all are of the same Age Group (45+ or 18+) as defined by the Government.
-    #    Please do not try to club together booking for Younger and Older Beneficiaries at the same time.
-
-    #####################################################################
-```
-```
-Enter comma separated index numbers of Beneficiaries to book for : 1
-```
-
-
-3. Ensure that the Beneficiaries are getting selected:
-```
-Selected Beneficiaries are:  
-+-------+----------------+---------------+-----------+-------+----------------------+
-|   idx |        bref_id | name          | vaccine   |   age | status               |
-+=======+================+===============+===========+=======+======================+
-|     1 | ██████████████ | █████████████ | ███████   |    ██ | ██████████████       |
-+-------+----------------+---------------+-----------+-------+----------------------+
-```
-
-4. Selecting the State:
-```
-+-------+-----------------------------+  
-| idx   | state                       |  
-+=======+=============================+  
-| 1     | Andaman and Nicobar Islands |  
-+-------+-----------------------------+  
-| 2     | Andhra Pradesh              |  
-+-------+-----------------------------+
-+-------+-----------------------------+
-+-------+-----------------------------+  
-| 35    | Uttar Pradesh               |  
-+-------+-----------------------------+  
-| 36    | Uttarakhand                 |  
-+-------+-----------------------------+  
-| 37    | West Bengal                 |  
-+-------+-----------------------------+
-```
-```
-Enter State Index from the Table: 12
-```
+## Guide
+### Pre-requisites
+1. [Setup on Windows/Linux/MacOS/Docker/AWS](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/Setup) (Required)
+2. [KVDB Bucket](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/KVDB)
+3. Phone Setup
+	1. Android
+	   1. [CoWIN OTP Retriever](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/CoWIN-OTP-Retriever) (Recommended)
+	   2. [IFTTT](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/IFTTT)
+	2. [iPhone](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/Shortcuts)
 	
-5. Select the Districts you are interested in. Multiple Districts can be selected by providing comma-separated index values...
-```
-+-------+-------------------------+
-|   idx | district                |
-+=======+=========================+
-|     1 | Ahmedabad               |
-+-------+-------------------------+
-|     2 | Ahmedabad Corporation   |
-+-------+-------------------------+
-|    .. | ......                  |
-+-------+-------------------------+
-|    41 | Valsad                  |
-+-------+-------------------------+
-```
-```
-Enter comma separated index numbers of Districts to monitor : 2
-```
-6. Ensure that the correct Districts are getting selected...
-```
-Selected Districts are:
-+-------+---------------+-----------------------+--------------+
-|   idx |   district_id | district_name         |   alert_freq |
-+=======+===============+=======================+==============+
-|     1 |           770 | Ahmedabad Corporation |          660 |
-+-------+---------------+-----------------------+--------------+
-```
+### Usage
 
-7. Additional Information regarding Vaccination Availability, Loading Data, Date etc... to be added by the User. 
-```
-Filter out Centres with Vaccine availability less than ? Minimum 1 :
-How often do you want to load Data from the Portal (in Seconds)? Default 15. Minimum 5. :
+`./covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
 
-Search for next seven day starting from when?
-Use 1 for Today, 2 for Tomorrow, or provide a date in the format DD-MM-YYYY. Default 2:
+This very basic CLI based script can be used to automate covid vaccination slot booking on Co-WIN Platform.
 
-Do you have a Preference for Fee Type?
-Enter 0 for No Preference, 1 for Free Only, or 2 for Paid Only. Default 0 :
-```
+*Note: All parameters are optional.*
 
-8. Program will now start to monitor the slots in these Districts every 15 seconds.
-```
-===================================================================================  
-Centres are available in Ahmedabad Corporation from 24-05-2021 as of 2021-05-23 09:29:10: 0
-No Options Available right now. Next Update in 15 seconds..
-```
+Parameter | Description
+------------ | -------------
+--mobile | Registered mobile on CoWIN
+--token | Token of the user
+--kvdb-bucket | kvdb.io bucket key
+--config | Path to store the configuration file
+--no-tty | Do not ask any terminal inputs. Proceed with smart choices
 
-9. If at any stage your Token becomes invalid, then the Program will make a Beep and Prompt for ```y``` or ```n```. If you would like to continue, provide ```y``` and proceed to allow using same Mobile Number
-```
-Token is INVALID! 
-Do you want to try for a new Token? (y/n Default y): y
-Enter the Registered Mobile Number: ███████████
-Enter OTP: ███████████
-```  
+Environment Variable | Description
+------------ | -------------
+BEEP | Setting `no` skips beeps
+KVDB_BUCKET | kvdb.io bucket key
 
-11. When a Center with more than minimum number of Slots is available, the Program will make a Beep sound - having different frequency for different districts. It will then display the available options as shown in the [Screenshot](https://github.com/dhhruv/Vac-Cowin/blob/master/assets/ss7.png).
-	
 
-12. Before the Next Update, you'll have 10 seconds to provide a choice in the given format ```centerIndex.slotIndex``` eg: The input```1.4``` will select the First Vaccination Center and its Fourth Slot.
+## Contents
+  - [Before you start](#before-you-start)
+  - [COVID-19 Vaccination Slot Booking Script](#covid-19-vaccination-slot-booking-script)
+    - [Important](#important)
+    - [Steps](#steps)
+  - [Troubleshooting common problems](#troubleshooting-common-problems)
+
+
+## Before you start
+1. If you face any issues please refer to the [troubleshooting section](#troubleshooting-common-problems) at the end of this doc
+2. If you are still facing errors and want to run this script on windows using exe, please see the section below [How to run on windows](#how-to-run-on-windows)
+3. Instructions for iOS have also been added. See the [Setup Guide for iOS](#setup-guide-for-ios) for details. Please note that its not possible to automate the OTP auto read on iOS completely, however its possible to make it a 1 tap process, which is far better than seeing and entering the OTP manually.
+
+## COVID-19 Vaccination Slot Booking Script
+
+This very basic CLI based script can be used to automate covid vaccination slot booking on Co-WIN Platform. 
+
+### Important: 
+- POC project. **Use at your own risk**.
+- Do NOT use unless all beneficiaries selected are supposed to get the same vaccine and dose. 
+- No option to register new user or add beneficiaries. This can be used only after beneficiary has been added through the official app/site
+- If you accidentally book a slot, don't worry. You can always login to the official portal and cancel that.
+- API Details: https://apisetu.gov.in/public/marketplace/api/cowin/cowinapi-v2
+- And finally, I know code quality probably isn't great. Suggestions are welcome.
+
+## Steps:
+1. Run script:
+	```python src\covid-vaccine-slot-booking.py```
+2. Select Beneficiaries. Read the important notes. You can select multiple beneficiaries by providing comma-separated index values such as ```1,2```:
+	```
+	Enter the registered mobile number: ██████████
+	Requesting OTP with mobile number ██████████..  
+	Enter OTP: 999999  
+	Validating OTP..  
+	Token Generated: █████████████████████████████████████████████████████████████  
+	Fetching registered beneficiaries..  
+	+-------+----------------------------+---------------------------+------------+  
+	| idx   | beneficiary_reference_id   | name                      | vaccine    |  
+	+=======+============================+===========================+============+  
+	| 1     | ██████████████             | █████████████████████████ | COVISHIELD |  
+	+-------+----------------------------+---------------------------+------------+  
+	| 2     | ██████████████             | █████████████████         |            |  
+	+-------+----------------------------+---------------------------+------------+  
+	  
+	################# IMPORTANT NOTES #################  
+	# 1. While selecting beneficiaries, make sure that selected beneficiaries are all taking the same dose: either first OR second.  
+	# Please do no try to club together booking for first dose for one beneficiary and second dose for another beneficiary.  
+	#  
+	# 2. While selecting beneficiaries, also make sure that beneficiaries selected for second dose are all taking the same vaccine: COVISHIELD OR COVAXIN.  
+	# Please do no try to club together booking for beneficiary taking COVISHIELD with beneficiary taking COVAXIN.  
+	###################################################  
+	  
+	Enter comma separated index numbers of beneficiaries to book for : 2
+	```
+
+
+3. Ensure correct beneficiaries are getting selected:
+	```
+	Selected beneficiaries:  
+	+-------+----------------------------+-----------+  
+	| idx   | beneficiary_reference_id   | vaccine   |  
+	+=======+============================+===========+  
+	| 1     | ██████████████             |           |  
+	+-------+----------------------------+-----------+
+	```
+
+4. Select a state
+	```
+	+-------+-----------------------------+  
+	| idx   | state                       |  
+	+=======+=============================+  
+	| 1     | Andaman and Nicobar Islands |  
+	+-------+-----------------------------+  
+	| 2     | Andhra Pradesh              |  
+	+-------+-----------------------------+
+	+-------+-----------------------------+
+	+-------+-----------------------------+  
+	| 35    | Uttar Pradesh               |  
+	+-------+-----------------------------+  
+	| 36    | Uttarakhand                 |  
+	+-------+-----------------------------+  
+	| 37    | West Bengal                 |  
+	+-------+-----------------------------+
+	```
+	```
+	Enter State index: 18
+	```
+5. Select districts you are interested in. Multiple districts can be selected by providing comma-separated index values
+	```
+	+-------+--------------------+  
+	| idx   | district           |  
+	+=======+====================+  
+	| 1     | Alappuzha          |  
+	+-------+--------------------+  
+	| 2     | Ernakulam          |  
+	+-------+--------------------+  
+	| 3     | Idukki             |  
+	+-------+--------------------+
+	+-------+--------------------+
+	+-------+--------------------+  
+	| 13    | Thrissur           |  
+	+-------+--------------------+  
+	| 14    | Wayanad            |  
+	+-------+--------------------+
+	```
+	```
+	Enter comma separated index numbers of districts to monitor : 2,13
+	```
+6. Ensure correct districts are getting selected.
+	```
+	Selected districts:  
+	+-------+---------------+-----------------+-----------------------+  
+	| idx   | district_id   | district_name   | district_alert_freq   |  
+	+=======+===============+=================+=======================+  
+	| 1     | 307           | Ernakulam       | 660                   |  
+	+-------+---------------+-----------------+-----------------------+  
+	| 2     | 303           | Thrissur        | 3080                  |  
+	+-------+---------------+-----------------+-----------------------+
+	```
+7. Enter the minimum number of slots to be available at the center:
+	```
+	Filter out centers with availability less than: 5
+	```
+8. Script will now start to monitor slots in these districts every 15 seconds. `Note`: It will ask you monitor frequency `ProTip`: Do not select less than 5 seconds it will bombard cowin server and will get your request blocked, create issues in OTP generation for your number. #85
+	```
+	===================================================================================  
+	Centers available in Ernakulam from 01-05-2021 as of 2021-04-30 15:13:44: 0  
+	Centers available in Thrissur from 01-05-2021 as of 2021-04-30 15:13:44: 0  
+	No viable options. Waiting for next update in 15s.
+	===================================================================================  
+	Centers available in Ernakulam from 01-05-2021 as of 2021-04-30 15:13:59: 0  
+	Centers available in Thrissur from 01-05-2021 as of 2021-04-30 15:13:59: 0  
+	No viable options. Waiting for next update in 15s.
+	```
+9. If at any stage your token becomes invalid, the script will make a beep and prompt for ```y``` or ```n```. If you'd like to continue, provide ```y``` and proceed to allow using same mobile number
+	```
+	Token is INVALID.  
+	Try for a new Token? (y/n): y
+	Try for OTP with mobile number ███████████? (y/n) : y
+	Enter OTP: 888888
+	```
+11. When a center with more than minimum number of slots is available, the script will make a beep sound - different frequency for different district. It will then display the available options as table:
+	```
+	===================================================================================  
+	Centers available in Ernakulam from 01-05-2021 as of 2021-04-30 15:34:19: 1  
+	Centers available in Thrissur from 01-05-2021 as of 2021-04-30 15:34:19: 0  
+	+-------+----------------+------------+-------------+------------+------------------------------------------------------------------------------+  
+	| idx   | name           | district   | available   | date       | slots                                                                        |  
+	+=======+================+============+=============+============+==============================================================================+  
+	| 1     | Ayyampilly PHC | Ernakulam  | 30          | 01-05-2021 | ['09:00AM-10:00AM', '10:00AM-11:00AM', '11:00AM-12:00PM', '12:00PM-02:00PM'] |  
+	+-------+----------------+------------+-------------+------------+------------------------------------------------------------------------------+  
+	---------->  Wait 10 seconds for updated options OR  
+	---------->  Enter a choice e.g: 1.4 for (1st center 4th slot): 1.3
+	```
+12. Before the next update, you'll have 10 seconds to provide a choice in the format ```centerIndex.slotIndex``` eg: The input```1.4``` will select the vaccination center in second row and its fourth slot.
+13. After successful slot booking, the appointment slip will be downloaded in your current working directory in the format `mobile_appointmentno`.
+
+<br>
 
 ## Working Screenshots:
 
@@ -260,11 +279,6 @@ Any contributions you make are **greatly appreciated**.
 Distributed under the MIT License. See `LICENSE` for more information.
 
 
-### Team Members:
-
-1.  [Dhruv Panchal](https://github.com/dhhruv)
-2.  [Urveshkumar Patel](https://github.com/urvesh254)
-3.  [Nirja Desai](https://github.com/nirami98)
 
 ### Important:
 
@@ -279,4 +293,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - The Developer reserves their rights to take any legal action as enumerated under the law against any unethical or illegal use of the same.
 - **API Details (Do read the first paragraph): https://apisetu.gov.in/public/marketplace/api/cowin/cowin-public-v2**
 
-<p align='center'><b>Made with ❤ by Dhruv Panchal</b></p>
