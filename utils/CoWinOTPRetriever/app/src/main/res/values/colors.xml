@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bismark">#4A6572</color>
+    <color name="oxford_blue">#232F34</color>
+    <color name="atomic">#344955</color>
+    <color name="yellow">#F9AA33</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#DDDDDDDD</color>
+</resources>
