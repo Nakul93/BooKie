@@ -165,7 +165,7 @@ def bookAppointment(request_header, details):
 
 
 def checkAndBook(
-    request_header, beneficiary_dtls, location_dtls, search_option, **kwargs
+    request_header, beneficiary_dtls, location_dtls,find_option, search_option, **kwargs
 ):
     """
     This function
@@ -213,6 +213,7 @@ def checkAndBook(
 
         if search_option == 2:
             options = checkCalenderByDistrict(
+                find_option,
                 request_header,
                 vaccine_type,
                 location_dtls,
@@ -224,6 +225,7 @@ def checkAndBook(
             )
         else:
             options = checkCalenderByPincode(
+                find_option,
                 request_header,
                 vaccine_type,
                 location_dtls,
@@ -276,7 +278,7 @@ def checkAndBook(
         else:
             for i in range(refresh_freq, 0, -1):
                 print(f"{Fore.YELLOW}", end="")
-                msg = f"No Options Available right now. Next Update in {i} seconds.."
+                msg = f"No Viable Options Available right now. Next Update in {i} seconds.."
                 print(msg, end="\r", flush=True)
                 print(f"{Fore.RESET}", end="")
                 sys.stdout.flush()

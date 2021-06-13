@@ -39,7 +39,38 @@ else:
         winsound.Beep(freq, duration)
 
 
+def correct_schema(sessions):
+    centers = {}
+    if "sessions" in sessions and len(sessions["sessions"]) > 0:
+        for session in sessions["sessions"]:
+            center_id = session["center_id"]
+            if center_id not in centers:
+                centers[center_id] = copy.deepcopy(session)
+                del centers[center_id]["session_id"]
+                del centers[center_id]["date"]
+                del centers[center_id]["available_capacity"]
+                del centers[center_id]["available_capacity_dose1"]
+                del centers[center_id]["available_capacity_dose2"]
+                del centers[center_id]["min_age_limit"]
+                del centers[center_id]["vaccine"]
+                del centers[center_id]["slots"]
+                centers[center_id]["sessions"] = []
+            centers[center_id]["sessions"].append(
+                {
+                    "session_id": session["session_id"],
+                    "date": session["date"],
+                    "available_capacity": session["available_capacity"],
+                    "available_capacity_dose1": session["available_capacity_dose1"],
+                    "available_capacity_dose2": session["available_capacity_dose2"],
+                    "min_age_limit": session["min_age_limit"],
+                    "vaccine": session["vaccine"],
+                    "slots": session["slots"],
+                }
+            )
+    return {"centers": list(centers.values())}
+
 def checkCalenderByDistrict(
+    find_option,
     request_header,
     vaccine_type,
     location_dtls,
@@ -62,7 +93,7 @@ def checkCalenderByDistrict(
             "==================================================================================="
         )
         today = datetime.datetime.today()
-        base_url = CALENDAR_URL_DISTRICT
+        base_url = CALENDAR_URL_DISTRICT if find_option == 1 else FIND_URL_DISTRICT
 
         if vaccine_type:
             base_url += f"&vaccine={vaccine_type}"
@@ -87,6 +118,9 @@ def checkCalenderByDistrict(
 
             elif resp.status_code == 200:
                 resp = resp.json()
+            
+                if find_option == 2:
+                    resp = correct_schema(resp)
 
                 resp = filterCenterbyAge(
                     resp, min_age_booking
@@ -119,6 +153,7 @@ def checkCalenderByDistrict(
 
 
 def checkCalenderByPincode(
+    find_option,
     request_header,
     vaccine_type,
     location_dtls,
@@ -141,7 +176,7 @@ def checkCalenderByPincode(
             "==================================================================================="
         )
         today = datetime.datetime.today()
-        base_url = CALENDAR_URL_PINCODE
+        base_url = CALENDAR_URL_PINCODE if find_option == 1 else FIND_URL_PINCODE
 
         if vaccine_type:
             base_url += f"&vaccine={vaccine_type}"
@@ -166,6 +201,8 @@ def checkCalenderByPincode(
 
             elif resp.status_code == 200:
                 resp = resp.json()
+                if find_option == 2:
+                    resp = correct_schema(resp)
 
                 resp = filterCenterbyAge(
                     resp, min_age_booking

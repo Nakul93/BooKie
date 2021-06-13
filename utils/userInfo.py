@@ -86,11 +86,18 @@ def getSavedUserInfo(filename):
     return data
 
 
-def startDateSearch():
+def startDateSearch(find_option):
     # Get search start date
     print(f"{Fore.YELLOW}", end="")
-    start_date = input(
-        "\nSearch for next Seven Days starting from when?\nUse 1 for Today, 2 for Tomorrow, or provide a date in the format dd-mm-yyyy. Default 2: "
+    start_date = (
+        input(
+            "\nUse 1 for today, 2 for tomorrow, or provide a date in the format dd-mm-yyyy. Default 2: "
+        )
+        if find_option == 1
+        else input(
+            "\nUse 1 for today, 2 for tomorrow, 3 for today and tomorrow, or provide a date in the format dd-mm-yyyy. "
+            "Default 2: "
+        )
     )
     print(f"{Fore.RESET}", end="")
     if not start_date:
@@ -231,7 +238,17 @@ def collectUserDetails(request_header):
     print(f"{Fore.RESET}", end="")
 
     refresh_freq = int(refresh_freq) if refresh_freq and int(refresh_freq) >= 5 else 30
+    
+    find_option = input(
+        "\nEnter 1 to search for seven days (rate limits are too high with this search) "
+        "or 2 for single date search (default) : "
+    )
 
+    if not find_option or int(find_option) not in [1, 2]:
+        find_option = 2
+    else:
+        find_option = int(find_option)
+        
     # Checking if partially vaccinated and thereby checking the the due date for dose2
     if all(
         [
@@ -272,9 +289,9 @@ def collectUserDetails(request_header):
                 os.system("pause")
                 sys.exit(1)
         else:
-            start_date = startDateSearch()
+            start_date = startDateSearch(find_option)
     else:
-        start_date = startDateSearch()
+        start_date = startDateSearch(find_option)
 
     # Get preference of Free/Paid option
     fee_type = getFeeTypePreference()
@@ -295,6 +312,7 @@ def collectUserDetails(request_header):
     collected_details = {
         "beneficiary_dtls": beneficiary_dtls,
         "location_dtls": location_dtls,
+        "find_option": find_option,
         "search_option": search_option,
         "minimum_slots": minimum_slots,
         "refresh_freq": refresh_freq,

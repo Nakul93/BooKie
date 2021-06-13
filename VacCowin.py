@@ -144,6 +144,7 @@ def main():
                 request_header,
                 info.beneficiary_dtls,
                 info.location_dtls,
+                info.find_option,
                 info.search_option,
                 min_slots=info.minimum_slots,
                 ref_freq=info.refresh_freq,
