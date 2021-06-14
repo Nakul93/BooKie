@@ -1,7 +1,7 @@
 
 ## Introduction:
 
-BooKie is a automated python script which lets you book slots and download appointment slips for the same.
+BooKie is a automated python script which lets you book vaccination slots and download appointment slips for the same.
 
 ## Table of Contents:
 
