@@ -40,7 +40,7 @@ else:
         winsound.Beep(freq, duration)
 
 
-def confirmAndProceed(collected_details):
+def confirmAndProceed(collected_details,no_tty):
     print(f"{Fore.RESET}", end="")
     print(
         "\n================================= Confirm the Information =================================\n"
@@ -48,7 +48,7 @@ def confirmAndProceed(collected_details):
     displayInfoDict(collected_details)
 
     print(f"{Fore.YELLOW}", end="")
-    confirm = input("\nProceed with the above Information (y/n Default y) : ")
+    confirm = input("\nProceed with the above Information (y/n Default y) : ") if no_tty else "y"
     print(f"{Fore.RESET}", end="")
     confirm = confirm if confirm else "y"
     if confirm != "y":
@@ -84,6 +84,17 @@ def getSavedUserInfo(filename):
         data = json.load(f)
 
     return data
+    
+def get_dose_num(collected_details):
+    # If any person has vaccine detail populated, we imply that they'll be taking second dose
+    # Note: Based on the assumption that everyone have the *EXACT SAME* vaccine status
+    if all(
+        detail["status"] == "Partially Vaccinated"
+        for detail in collected_details["beneficiary_dtls"]
+    ):
+        return 2
+
+    return 1
 
 
 def startDateSearch(find_option):

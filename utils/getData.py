@@ -178,7 +178,7 @@ def getBeneficiaries(request_header):
                 )
             else:
                 vaccinated = False
-                # print(beneficiary_2)
+                
 
             tmp = {
                 "bref_id": beneficiary["beneficiary_reference_id"],

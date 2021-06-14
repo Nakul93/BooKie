@@ -8,9 +8,12 @@ import sys
 import time
 from types import SimpleNamespace
 
+import jwt
+
 import requests
 from colorama import Fore, Style, init
 
+from utils.ratelimit import *
 from utils.appointment import checkAndBook
 from utils.displayData import displayInfoDict
 from utils.generateOTP import (
@@ -24,12 +27,22 @@ from utils.userInfo import (
     confirmAndProceed,
     getSavedUserInfo,
     saveUserInfo,
+    get_dose_num,
 )
 from utils.getData import fetch_beneficiaries
 init(convert=True)
 
 WARNING_BEEP_DURATION = (1000, 2000)
 KVDB_BUCKET = os.getenv("KVDB_BUCKET")
+
+def is_token_valid(token):
+    payload = jwt.decode(token, options={"verify_signature": False})
+    remaining_seconds = payload["exp"] - int(time.time())
+    if remaining_seconds <= 1 * 30:  # 30 secs early before expiry for clock issues
+        return False
+    if remaining_seconds <= 60:
+        print("Token is about to expire in next 1 min ...")
+    return True
 
 try:
     import winsound
@@ -281,16 +294,15 @@ def main():
                                 mobile, base_request_header
                             )
 
-                check_and_book(
+                checkAndBook(
                     request_header,
                     info.beneficiary_dtls,
                     info.location_dtls,
-                    info.pin_code_location_dtls,
                     info.find_option,
                     info.search_option,
                     min_slots=info.minimum_slots,
                     ref_freq=info.refresh_freq,
-                    # auto_book=info.auto_book,
+                    auto_book=info.auto_book,
                     start_date=info.start_date,
                     vaccine_type=info.vaccine_type,
                     fee_type=info.fee_type,

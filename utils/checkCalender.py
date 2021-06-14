@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import copy
 
 import requests
 from colorama import Fore, Style, init
