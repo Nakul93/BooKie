@@ -266,3 +266,6 @@ def getMinAge(beneficiary_dtls):
     age_list = [item["age"] for item in beneficiary_dtls]
     min_age = min(age_list)
     return min_age
+    
+def fetch_beneficiaries(request_header):
+    return requests.get(BENEFICIARIES_URL, headers=request_header)

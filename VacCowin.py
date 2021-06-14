@@ -25,7 +25,7 @@ from utils.userInfo import (
     getSavedUserInfo,
     saveUserInfo,
 )
-
+from utils.getData import fetch_beneficiaries
 init(convert=True)
 
 WARNING_BEEP_DURATION = (1000, 2000)
