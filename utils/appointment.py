@@ -165,7 +165,7 @@ def bookAppointment(request_header, details):
 
 
 def checkAndBook(
-    request_header, beneficiary_dtls, location_dtls,find_option, search_option, **kwargs
+    base_request_header,token_service, beneficiary_dtls, location_dtls, pin_code_location_dtls, api_type, find_option, search_option, **kwargs
 ):
     """
     This function
@@ -175,69 +175,55 @@ def checkAndBook(
         4. Calls function to book appointment, and
         5. Returns True or False depending on Token Validity
     """
+    slots_available = False
     try:
         min_age_booking = getMinAge(beneficiary_dtls)
 
         minimum_slots = kwargs["min_slots"]
         refresh_freq = kwargs["ref_freq"]
         auto_book = kwargs["auto_book"]
-        start_date = kwargs["start_date"]
+        start_dates = []
+        input_start_date = kwargs["start_date"]
         vaccine_type = kwargs["vaccine_type"]
         fee_type = kwargs["fee_type"]
+        mobile = kwargs["mobile"]
+        dose_num = kwargs["dose_num"]
 
-        """ dose = (
-            2
-            if [beneficiary["status"] for beneficiary in beneficiary_dtls][0]
-            == "Partially Vaccinated"
-            else 1
-        ) """
-
-        dose = (
-            2 if any(beneficiary["vaccine"] for beneficiary in beneficiary_dtls) else 1
-        )
-
-        # dose = (2 if any(detail['vaccine'] for detail in collected_details["beneficiary_dtls"]) else 1)
-
-        if isinstance(start_date, int) and start_date == 2:
-            start_date = (
-                datetime.datetime.today() + datetime.timedelta(days=1)
-            ).strftime("%d-%m-%Y")
-        elif isinstance(start_date, int) and start_date == 1:
-            start_date = datetime.datetime.today().strftime("%d-%m-%Y")
-        else:
-            pass
+        if isinstance(input_start_date, int) and input_start_date in [1, 3]:
+            start_dates.append(datetime.datetime.today().strftime("%d-%m-%Y"))
+        if isinstance(input_start_date, int) and input_start_date in [2, 3]:
+            start_dates.append(
+                (datetime.datetime.today() + datetime.timedelta(days=1)).strftime(
+                    "%d-%m-%Y"
+                )
+            )
+        if not isinstance(input_start_date, int):
+            start_dates.append(input_start_date)
 
         # num_days = 7
         # list_format = [start_date + datetime.timedelta(days=i) for i in range(num_days)]
         # actual_dates = [i.strftime("%d-%m-%Y") for i in list_format]
-
-        if search_option == 2:
-            options = checkCalenderByDistrict(
-                find_option,
-                request_header,
-                vaccine_type,
-                location_dtls,
-                start_date,
-                minimum_slots,
-                min_age_booking,
+        options = []
+        for start_date in start_dates:
+            options_for_date = get_options_for_date(
+                dose_num,
                 fee_type,
-                dose,
-            )
-        else:
-            options = checkCalenderByPincode(
                 find_option,
-                request_header,
-                vaccine_type,
                 location_dtls,
-                start_date,
-                minimum_slots,
                 min_age_booking,
-                fee_type,
-                dose,
+                minimum_slots,
+                pin_code_location_dtls,
+                base_request_header,
+                search_option,
+                start_date,
+                vaccine_type,
+                token_service,
+                api_type
             )
+            if isinstance(options_for_date, bool):
+                return False
+            options.extend(options_for_date)
 
-        if isinstance(options, bool):
-            return False
 
         options = sorted(
             options,
@@ -258,7 +244,11 @@ def checkAndBook(
                 cleaned_options_for_display.append(item)
 
             displayTable(cleaned_options_for_display)
-            if auto_book == "yes-please":
+            token = token_service.get_token()
+            request_header = copy.deepcopy(base_request_header)
+            request_header["Authorization"] = f"Bearer {token}"
+            slots_available = True
+            if auto_book == "y":
                 print(f"{Fore.GREEN}", end="")
                 print(
                     "AUTO-BOOKING IS ENABLED. PROCEEDING WITH FIRST CENTRE, DATE, and RANDOM SLOT."
@@ -290,6 +280,9 @@ def checkAndBook(
         return True
 
     else:
+        token = token_service.get_token()
+        request_header = copy.deepcopy(base_request_header)
+        request_header["Authorization"] = f"Bearer {token}"
         if choice == ".":
             return True
         else:
@@ -325,3 +318,77 @@ def checkAndBook(
                 print(f"{Fore.RESET}", end="")
                 os.system("pause")
                 pass
+                
+def get_options_for_date(
+    dose_num,
+    fee_type,
+    find_option,
+    location_dtls,
+    min_age_booking,
+    minimum_slots,
+    pin_code_location_dtls,
+    base_request_header,
+    search_option,
+    start_date,
+    vaccine_type,
+    token_service,
+    api_type,
+):
+    if search_option == 3:
+        options = checkCalenderByDistrict(
+            api_type,
+            find_option,
+            base_request_header,
+            token_service,
+            vaccine_type,
+            location_dtls,
+            start_date,
+            minimum_slots,
+            min_age_booking,
+            fee_type,
+            dose_num,
+            #beep_required=False,
+        )
+
+        if not isinstance(options, bool):
+            pincode_filtered_options = []
+            for option in options:
+                for location in pin_code_location_dtls:
+                    if int(location["pincode"]) == int(option["pincode"]):
+                        # ADD this filtered PIN code option
+                        pincode_filtered_options.append(option)
+                        for _ in range(2):
+                            beep(location["alert_freq"], 150)
+            options = pincode_filtered_options
+
+    elif search_option == 2:
+        options = checkCalenderByDistrict(
+            api_type,
+            find_option,
+            base_request_header,
+            token_service,
+            vaccine_type,
+            location_dtls,
+            start_date,
+            minimum_slots,
+            min_age_booking,
+            fee_type,
+            dose_num,
+            #beep_required=True,
+        )
+    else:
+        options = checkCalenderByPincode(
+            api_type,
+            find_option,
+            base_request_header,
+            token_service,
+            vaccine_type,
+            location_dtls,
+            start_date,
+            minimum_slots,
+            min_age_booking,
+            fee_type,
+            dose_num,
+        )
+    return options
+

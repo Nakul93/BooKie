@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import colorama
+from colorama import*
+
 import argparse
 import copy
 import os
@@ -11,7 +14,7 @@ from types import SimpleNamespace
 import jwt
 
 import requests
-from colorama import Fore, Style, init
+
 
 from utils.ratelimit import *
 from utils.appointment import checkAndBook
@@ -19,6 +22,10 @@ from utils.displayData import displayInfoDict
 from utils.generateOTP import (
 generateTokenOTP,
 generate_token_OTP_manual,
+)
+from utils.otp import (
+    ManualTokenService,
+    AutoTokenService, JustInTimeAutoTokenService
 )
 
 from utils.urls import *
@@ -31,6 +38,9 @@ from utils.userInfo import (
 )
 from utils.getData import fetch_beneficiaries
 init(convert=True)
+
+
+
 
 WARNING_BEEP_DURATION = (1000, 2000)
 KVDB_BUCKET = os.getenv("KVDB_BUCKET")
@@ -70,11 +80,13 @@ else:
 
 
 def main():
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--token", help="Passing the token directly")
     parser.add_argument("--mobile", help="Pass mobile directly")
     parser.add_argument("--kvdb-bucket", help="Pass kvdb.io bucket directly")
     parser.add_argument("--config", help="Config file name")
+    parser.add_argument("--otp-pref", help="jit, auto, manual", choices=["jit", "auto", "manual"])
     parser.add_argument(
         "--no-tty",
         help="Do not ask any terminal inputs. Proceed with smart choices",
@@ -82,15 +94,34 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.config:
-        filename = args.config
-    else:
-        filename = "vaccine-booking-details-"
-
+    print("""
+ __       __   ______   _______   __    __  ______  __    __   ______
+/  |  _  /  | /      \ /       \ /  \  /  |/      |/  \  /  | /      \
+$$ | / \ $$ |/$$$$$$  |$$$$$$$  |$$  \ $$ |$$$$$$/ $$  \ $$ |/$$$$$$  |
+$$ |/$  \$$ |$$ |__$$ |$$ |__$$ |$$$  \$$ |  $$ |  $$$  \$$ |$$ | _$$/
+$$ /$$$  $$ |$$    $$ |$$    $$< $$$$  $$ |  $$ |  $$$$  $$ |$$ |/    |
+$$ $$/$$ $$ |$$$$$$$$ |$$$$$$$  |$$ $$ $$ |  $$ |  $$ $$ $$ |$$ |$$$$ |
+$$$$/  $$$$ |$$ |  $$ |$$ |  $$ |$$ |$$$$ | _$$ |_ $$ |$$$$ |$$ \__$$ |
+$$$/    $$$ |$$ |  $$ |$$ |  $$ |$$ | $$$ |/ $$   |$$ | $$$ |$$    $$/
+$$/      $$/ $$/   $$/ $$/   $$/ $$/   $$/ $$$$$$/ $$/   $$/  $$$$$$/
+                                                                       
+Please read the terms and conditions on CoWIN before proceeding.
+Link: https://cowin.gov.in/terms-condition
+Limits:
+1.  Public & Protected APIs are rate limited at 100 requests per 5 mins.
+2.  Protected Calendar Search is rate limited at 20 requests per session.
+3.  Maximum 50 OTPs can be requested in 24 hours.
+    """)
+    beep(500, 150)
     if args.mobile:
         mobile = args.mobile
     else:
-        mobile = None
+        mobile = input("Enter the registered mobile number: ")
+
+    if args.config:
+        filename = args.config
+    else:
+        filename = "vaccine-booking-details-" + mobile + ".json"
         
     if args.kvdb_bucket:
         kvdb_bucket = args.kvdb_bucket
@@ -111,62 +142,41 @@ def main():
         }
 
         token = None
-        otp_pref = "n"
+        otp_pref = args.otp_pref
+
+        if not otp_pref:
+            print("""
+Protected APIs need authentication for every call. Public APIs need authentication for configuration and booking.
+Choose your OTP mode:
+1.  Just in time (Auto): This mode will request OTP via KVDB when it is needed.
+2.  Automatic: This mode will request OTP via KVDB in Background and ensure you are always logged in.
+3.  Manual: This mode requires you to provide OTP whenever required.
+    """)
+            otp_pref = input("enter 1, 2, or 3 :")
+
+            if otp_pref and otp_pref in ["1", "2", "3"]:
+                otp_pref = "jit" if otp_pref == "1" else "auto" if otp_pref == "2" else "manual"
+            else:
+                print("Invalid Input. Bye.")
+                sys.exit(1)
+
         if args.token:
             token = args.token
+
+        if otp_pref == "jit":
+            token_service = JustInTimeAutoTokenService(mobile, base_request_header)
+        elif otp_pref == 'auto':
+            token_service = AutoTokenService(mobile, base_request_header)
         else:
-            if mobile is None:
-                mobile = input("Enter the registered mobile number: ")
-            if not args.config:
-                filename = filename + mobile + ".json"
-            if not kvdb_bucket:
-                otp_pref = (
-                    input(
-                        "\nDo you want to enter OTP manually, instead of auto-read? \nRemember selecting n would require some setup described in README (y/n Default n): "
-                    )
-                    if args.no_tty
-                    else "n"
-                )
-                otp_pref = otp_pref if otp_pref else "n"
-                if otp_pref == "n":
-                    kvdb_bucket = (
-                        input(
-                            "Please refer KVDB setup in ReadMe to setup your own KVDB bucket. Please enter your KVDB bucket value here: "
-                        )
-                        if args.no_tty and kvdb_bucket is None
-                        else kvdb_bucket
-                    )
-                    if not kvdb_bucket:
-                        print(
-                            "Sorry, having your private KVDB bucket is mandatory. Please refer ReadMe and create your own private KVBD bucket."
-                        )
-                        sys.exit()
-            if kvdb_bucket:
-                print(
-                    "\n### Note ### Please make sure the URL configured in the IFTTT/Shortcuts app on your phone is: "
-                    + "https://kvdb.io/"
-                    + kvdb_bucket
-                    + "/"
-                    + mobile
-                    + "\n"
-                )
+            token_service = ManualTokenService(mobile, base_request_header)
 
-
-            while token is None:
-                if otp_pref == "n":
-                    try:
-                        token = generateTokenOTP(
-                            mobile, base_request_header, kvdb_bucket
-                        )
-                    except Exception as e:
-                        print(str(e))
-                        print("OTP Retrying in 5 seconds")
-                        time.sleep(5)
-                elif otp_pref == "y":
-                    token = generate_token_OTP_manual(mobile, base_request_header)
-
-        request_header = copy.deepcopy(base_request_header)
-        request_header["Authorization"] = f"Bearer {token}"
+        token_service.collect_inputs(kvdb_bucket=kvdb_bucket, token=token)
+        if token:
+            # token was passed via cli.
+            token_service.set_token(token)
+        # token = token_service.get_token()
+        # request_header = copy.deepcopy(base_request_header)
+        # request_header["Authorization"] = f"Bearer {token}"
 
         if os.path.exists(filename):
             print(
@@ -202,63 +212,65 @@ def main():
                 file_acceptable = file_acceptable if file_acceptable else "y"
 
                 if file_acceptable != "y":
-                    collected_details = collectUserDetails(request_header)
+                    collected_details = collectUserDetails(base_request_header,token_service)
                     saveUserInfo(filename, collected_details)
 
             else:
-                collected_details = collectUserDetails(request_header)
+                collected_details = collectUserDetails(base_request_header,token_service)
                 saveUserInfo(filename, collected_details)
 
         else:
-            collected_details = collectUserDetails(request_header)
+            collected_details = collectUserDetails(base_request_header)
             saveUserInfo(filename, collected_details)
             confirmAndProceed(collected_details, args.no_tty)
 
-        # HACK: Temporary workaround for not supporting reschedule appointments
-        beneficiary_ref_ids = [
-            beneficiary["bref_id"]
-            for beneficiary in collected_details["beneficiary_dtls"]
-        ]
-        beneficiary_dtls = fetch_beneficiaries(request_header)
-        if beneficiary_dtls.status_code == 200:
-            beneficiary_dtls = [
-                beneficiary
-                for beneficiary in beneficiary_dtls.json()["beneficiaries"]
-                if beneficiary["beneficiary_reference_id"] in beneficiary_ref_ids
+            # HACK: Temporary workaround for not supporting reschedule appointments
+            # TODO : Not called when saved file is not choosen.
+            beneficiary_ref_ids = [
+                beneficiary["bref_id"]
+                for beneficiary in collected_details["beneficiary_dtls"]
             ]
-            active_appointments = []
-            for beneficiary in beneficiary_dtls:
-                expected_appointments = (
-                    1
-                    if beneficiary["vaccination_status"] == "Partially Vaccinated"
-                    else 0
-                )
-                if len(beneficiary["appointments"]) > expected_appointments:
-                    data = beneficiary["appointments"][expected_appointments]
-                    beneficiary_data = {
-                        "name": data["name"],
-                        "state_name": data["state_name"],
-                        "dose": data["dose"],
-                        "date": data["date"],
-                        "slot": data["slot"],
-                    }
-                    active_appointments.append(
-                        {"beneficiary": beneficiary["name"], **beneficiary_data}
+            beneficiary_dtls = fetch_beneficiaries(base_request_header, token_service)
+            if beneficiary_dtls.status_code == 200:
+                beneficiary_dtls = [
+                    beneficiary
+                    for beneficiary in beneficiary_dtls.json()["beneficiaries"]
+                    if beneficiary["beneficiary_reference_id"] in beneficiary_ref_ids
+                ]
+                active_appointments = []
+                for beneficiary in beneficiary_dtls:
+                    expected_appointments = (
+                        1
+                        if beneficiary["vaccination_status"] == "Partially Vaccinated"
+                        else 0
                     )
 
-            if active_appointments:
+                    if len(beneficiary["appointments"]) > expected_appointments:
+                        data = beneficiary["appointments"][expected_appointments]
+                        beneficiary_data = {
+                            "name": data["name"],
+                            "state_name": data["state_name"],
+                            "dose": data["dose"],
+                            "date": data["date"],
+                            "slot": data["slot"],
+                        }
+                        active_appointments.append(
+                            {"beneficiary": beneficiary["name"], **beneficiary_data}
+                        )
+
+                if active_appointments:
+                    print(
+                        "The following appointments are active! Please cancel them manually first to continue"
+                    )
+                    display_table(active_appointments)
+                    beep(WARNING_BEEP_DURATION[0], WARNING_BEEP_DURATION[1])
+                    return
+            else:
                 print(
-                    "The following appointments are active! Please cancel them manually first to continue"
+                    "WARNING: Failed to check if any beneficiary has active appointments. Please cancel before using this script"
                 )
-                display_table(active_appointments)
-                beep(WARNING_BEEP_DURATION[0], WARNING_BEEP_DURATION[1])
-                return
-        else:
-            print(
-                "WARNING: Failed to check if any beneficiary has active appointments. Please cancel before using this script"
-            )
-            if args.no_tty:
-                input("Press any key to continue execution...")
+                if args.no_tty:
+                    input("Press any key to continue execution...")
 
         info = SimpleNamespace(**collected_details)
 
@@ -266,38 +278,17 @@ def main():
             disable_re_assignment_feature()
 
         while True:  # infinite-loop
-            # create new request_header
-            request_header = copy.deepcopy(base_request_header)
-            request_header["Authorization"] = f"Bearer {token}"
+
 
             # call function to check and book slots
             try:
-                token_valid = is_token_valid(token)
-
-                # token is invalid ?
-                # If yes, generate new one
-                if not token_valid:
-                    print("Token is INVALID.")
-                    token = None
-                    while token is None:
-                        if otp_pref == "n":
-                            try:
-                                token = generateTokenOTP(
-                                    mobile, base_request_header, kvdb_bucket
-                                )
-                            except Exception as e:
-                                print(str(e))
-                                print("OTP Retrying in 5 seconds")
-                                time.sleep(5)
-                        elif otp_pref == "y":
-                            token = generate_token_OTP_manual(
-                                mobile, base_request_header
-                            )
-
-                checkAndBook(
-                    request_header,
+                    checkAndBook(
+                    base_request_header,
+                    token_service,
                     info.beneficiary_dtls,
                     info.location_dtls,
+                    info.pin_code_location_dtls,
+                    info.api_type,
                     info.find_option,
                     info.search_option,
                     min_slots=info.minimum_slots,
@@ -314,15 +305,11 @@ def main():
                 print(str(e))
                 print("Retryin in 5 seconds")
                 time.sleep(5)
-
+                
     except Exception as e:
         print(str(e))
         print("Exiting Script")
         os.system("pause")
         
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print(f"\n\n{Fore.RED}User Aborted the Program.\nExiting, Please Wait...")
-        sys.exit()
+    main()

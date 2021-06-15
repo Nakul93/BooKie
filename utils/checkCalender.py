@@ -71,8 +71,10 @@ def correct_schema(sessions):
     return {"centers": list(centers.values())}
 
 def checkCalenderByDistrict(
+    api_type,
     find_option,
-    request_header,
+    base_request_header,
+    token_service,
     vaccine_type,
     location_dtls,
     start_date,
@@ -94,10 +96,21 @@ def checkCalenderByDistrict(
             "==================================================================================="
         )
         today = datetime.datetime.today()
-        base_url = CALENDAR_URL_DISTRICT if find_option == 1 else FIND_URL_DISTRICT
+        if api_type == "public" and find_option == 1:
+            base_url = CALENDAR_URL_DISTRICT_PUB
+        elif api_type == "public" and find_option == 2:
+            base_url = FIND_URL_DISTRICT_PUB
+        elif api_type == "protected" and find_option == 1:
+            base_url = CALENDAR_URL_DISTRICT_PRO
+        else:
+            base_url = FIND_URL_DISTRICT_PRO
 
-        if vaccine_type:
-            base_url += f"&vaccine={vaccine_type}"
+        request_header = copy.deepcopy(base_request_header)
+        if api_type == "protected":
+            token = token_service.get_token()
+            request_header["Authorization"] = f"Bearer {token}"
+            if vaccine_type:
+                base_url += f"&vaccine={vaccine_type}"
 
         options = []
 
@@ -154,8 +167,10 @@ def checkCalenderByDistrict(
 
 
 def checkCalenderByPincode(
+    api_type,
     find_option,
-    request_header,
+    base_request_header,
+    token_service,
     vaccine_type,
     location_dtls,
     start_date,
@@ -177,10 +192,21 @@ def checkCalenderByPincode(
             "==================================================================================="
         )
         today = datetime.datetime.today()
-        base_url = CALENDAR_URL_PINCODE if find_option == 1 else FIND_URL_PINCODE
+        if api_type == "public" and find_option == 1:
+            base_url = CALENDAR_URL_PINCODE_PUB
+        elif api_type == "public" and find_option == 2:
+            base_url = FIND_URL_PINCODE_PUB
+        elif api_type == "protected" and find_option == 1:
+            base_url = CALENDAR_URL_PINCODE_PRO
+        else:
+            base_url = FIND_URL_DISTRICT_PRO
 
-        if vaccine_type:
-            base_url += f"&vaccine={vaccine_type}"
+        request_header = copy.deepcopy(base_request_header)
+        if api_type == "protected":
+            token = token_service.get_token()
+            request_header["Authorization"] = f"Bearer {token}"
+            if vaccine_type:
+                base_url += f"&vaccine={vaccine_type}"
 
         options = []
 

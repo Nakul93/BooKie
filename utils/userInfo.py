@@ -82,7 +82,15 @@ def saveUserInfo(filename, details):
 def getSavedUserInfo(filename):
     with open(filename, "r") as f:
         data = json.load(f)
+    # for backward compatible logic
+    if data["search_option"] != 3 and "pin_code_location_dtls" not in data:
+        data["pin_code_location_dtls"] = []
 
+    if "find_option" not in data:
+        data["find_option"] = 1
+
+    if "api_type" not in data:
+        data["api_type"] = "public"
     return data
     
 def get_dose_num(collected_details):
@@ -124,12 +132,12 @@ def startDateSearch(find_option):
     return start_date
 
 
-def collectUserDetails(request_header):
+def collectUserDetails(base_request_header,token_service):
     # Get Beneficiaries
     print(f"{Fore.CYAN}", end="")
     print("Fetching the Registered Beneficiaries... ")
     print(f"{Fore.RESET}", end="")
-    beneficiary_dtls = getBeneficiaries(request_header)
+    beneficiary_dtls = getBeneficiaries(base_request_header, token_service)
 
     if len(beneficiary_dtls) == 0:
         print(f"{Fore.RED}", end="")
@@ -201,22 +209,25 @@ def collectUserDetails(request_header):
     )
     # get search method to use
     print(f"{Fore.YELLOW}", end="")
+        # get search method to use
     search_option = input(
-        """\nSearch by Pincode? OR by State & District? \nEnter 1 for Pincode or 2 for State & District. (Default 2) : """
+        """Search by Pincode? Or by State/District Or Smart search State/District for selected Pincodes ? \nEnter 1 for Pincode or 2 for State/District or 3 for State/District filter by Pincodes (Optimized for rate-limit) (Default 2): """
     )
     print(f"{Fore.RESET}", end="")
-
-    if not search_option or int(search_option) not in [1, 2]:
+    if not search_option or int(search_option) not in [1, 2, 3]:
         search_option = 2
     else:
         search_option = int(search_option)
 
-    if search_option == 2:
-        # Collect vaccination center preferance
-        location_dtls = getDistricts(request_header)
-
+    pin_code_location_dtls = []
+    if search_option == 3:
+        location_dtls = getDistricts(base_request_header)
+        pin_code_location_dtls = get_pincodes()
+    elif search_option == 2:
+        # Collect vaccination center preference
+        location_dtls = getDistricts(base_request_header)
     else:
-        # Collect vaccination center preferance
+        # Collect vaccination center preference
         location_dtls = getPincodes()
 
     print(
@@ -237,6 +248,12 @@ def collectUserDetails(request_header):
         )
     else:
         minimum_slots = len(beneficiary_dtls)
+        
+    api_type = input(
+        "Which API you want to use? Enter 1 for Public (default) and 2 for Protected: "
+    )
+
+    api_type = "protected" if api_type == "2" else "public"
 
     # Get refresh frequency
     print(f"{Fore.YELLOW}", end="")
@@ -315,14 +332,15 @@ def collectUserDetails(request_header):
     )
     print(f"{Fore.YELLOW}", end="")
     auto_book = input(
-        "Do you want to Enable the Auto-Booking Function? (yes-please or no) Default no: "
+        "Do you want to Enable the Auto-Booking Function? (y/n) Default no: "
     )
     print(f"{Fore.RESET}", end="")
-    auto_book = "no" if not auto_book else auto_book
+    auto_book = "n" if not auto_book else auto_book
 
     collected_details = {
         "beneficiary_dtls": beneficiary_dtls,
         "location_dtls": location_dtls,
+        "pin_code_location_dtls": pin_code_location_dtls,
         "find_option": find_option,
         "search_option": search_option,
         "minimum_slots": minimum_slots,
@@ -331,6 +349,7 @@ def collectUserDetails(request_header):
         "start_date": start_date,
         "vaccine_type": vaccine_type,
         "fee_type": fee_type,
+        "api_type": api_type
     }
 
     return collected_details

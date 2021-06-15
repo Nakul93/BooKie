@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import copy
 
 import requests
 from colorama import Fore, Style, init
@@ -147,13 +148,16 @@ def getDose2DueDate(vaccine_type):
         return sputnikV_due_date
 
 
-def getBeneficiaries(request_header):
+def getBeneficiaries(base_request_header, token_service):
     """
     This function
         1. Fetches all beneficiaries registered under the mobile number,
         2. Prompts user to select the applicable beneficiaries, and
         3. Returns the list of beneficiaries as list(dict)
     """
+    token = token_service.get_token()
+    request_header = copy.deepcopy(base_request_header)
+    request_header["Authorization"] = f"Bearer {token}"
     beneficiaries = requests.get(BENEFICIARIES_URL, headers=request_header)
 
     vaccinated = False
