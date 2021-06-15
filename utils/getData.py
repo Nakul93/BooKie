@@ -271,5 +271,8 @@ def getMinAge(beneficiary_dtls):
     min_age = min(age_list)
     return min_age
     
-def fetch_beneficiaries(request_header):
+def fetch_beneficiaries(base_request_header, token_service):
+    token = token_service.get_token()
+    request_header = copy.deepcopy(base_request_header)
+    request_header["Authorization"] = f"Bearer {token}"
     return requests.get(BENEFICIARIES_URL, headers=request_header)

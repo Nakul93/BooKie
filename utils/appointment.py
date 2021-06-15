@@ -244,9 +244,10 @@ def checkAndBook(
                 cleaned_options_for_display.append(item)
 
             displayTable(cleaned_options_for_display)
-            token = token_service.get_token()
-            request_header = copy.deepcopy(base_request_header)
-            request_header["Authorization"] = f"Bearer {token}"
+            #slots_available = True
+            #token = token_service.get_token()
+            #request_header = copy.deepcopy(base_request_header)
+            #request_header["Authorization"] = f"Bearer {token}"
             slots_available = True
             if auto_book == "y":
                 print(f"{Fore.GREEN}", end="")
@@ -280,44 +281,48 @@ def checkAndBook(
         return True
 
     else:
-        token = token_service.get_token()
-        request_header = copy.deepcopy(base_request_header)
-        request_header["Authorization"] = f"Bearer {token}"
-        if choice == ".":
+         if not slots_available:
             return True
-        else:
-            try:
-                choice = choice.split(".")
-                choice = [int(item) for item in choice]
-                print(f"{Fore.GREEN}", end="")
-                print(
-                    f"============> Got a Choice: Center #{choice[0]}, Slot #{choice[1]}\n"
-                )
-                print(f"{Fore.RESET}", end="")
+         else:
+            token = token_service.get_token()
+            request_header = copy.deepcopy(base_request_header)
+            request_header["Authorization"] = f"Bearer {token}"
+            
+            if choice == ".":
+                return True
+            else:
+                try:
+                    choice = choice.split(".")
+                    choice = [int(item) for item in choice]
+                    print(f"{Fore.GREEN}", end="")
+                    print(
+                        f"============> Got a Choice: Center #{choice[0]}, Slot #{choice[1]}\n"
+                    )
+                    print(f"{Fore.RESET}", end="")
 
-                new_req = {
-                    "beneficiaries": [
-                        beneficiary["bref_id"] for beneficiary in beneficiary_dtls
-                    ],
-                    "dose": 2
-                    if any(beneficiary["vaccine"] for beneficiary in beneficiary_dtls)
-                    else 1,
-                    "center_id": options[choice[0] - 1]["center_id"],
-                    "session_id": options[choice[0] - 1]["session_id"],
-                    "slot": options[choice[0] - 1]["slots"][choice[1] - 1],
-                }
+                    new_req = {
+                        "beneficiaries": [
+                            beneficiary["bref_id"] for beneficiary in beneficiary_dtls
+                        ],
+                        "dose": 2
+                        if any(beneficiary["vaccine"] for beneficiary in beneficiary_dtls)
+                        else 1,
+                        "center_id": options[choice[0] - 1]["center_id"],
+                        "session_id": options[choice[0] - 1]["session_id"],
+                        "slot": options[choice[0] - 1]["slots"][choice[1] - 1],
+                    }
 
-                print(f"{Fore.GREEN}", end="")
-                print(f"Booking with Information: {new_req}")
-                print(f"{Fore.RESET}", end="")
-                return bookAppointment(request_header, new_req)
+                    print(f"{Fore.GREEN}", end="")
+                    print(f"Booking with Information: {new_req}")
+                    print(f"{Fore.RESET}", end="")
+                    return bookAppointment(request_header, new_req)
 
-            except IndexError:
-                print(f"{Fore.RED}", end="")
-                print("============> Invalid Option Entered!")
-                print(f"{Fore.RESET}", end="")
-                os.system("pause")
-                pass
+                except IndexError:
+                    print(f"{Fore.RED}", end="")
+                    print("============> Invalid Option Entered!")
+                    print(f"{Fore.RESET}", end="")
+                    os.system("pause")
+                    pass
                 
 def get_options_for_date(
     dose_num,

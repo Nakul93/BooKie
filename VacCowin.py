@@ -3,7 +3,7 @@
 
 import colorama
 from colorama import*
-
+import traceback
 import argparse
 import copy
 import os
@@ -133,7 +133,8 @@ Limits:
     print("Running VacCowin...")
     print(f"{Fore.RESET}", end="")
     beep(500, 150)
-
+    
+    token_service = None
     try:
         base_request_header = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
@@ -220,7 +221,7 @@ Choose your OTP mode:
                 saveUserInfo(filename, collected_details)
 
         else:
-            collected_details = collectUserDetails(base_request_header)
+            collected_details = collectUserDetails(base_request_header,token_service)
             saveUserInfo(filename, collected_details)
             confirmAndProceed(collected_details, args.no_tty)
 
@@ -308,6 +309,7 @@ Choose your OTP mode:
                 
     except Exception as e:
         print(str(e))
+        traceback.print_exc()
         print("Exiting Script")
         os.system("pause")
         

@@ -14,6 +14,24 @@ WARNING_BEEP_DURATION = (1000, 2000)
 
 init(convert=True)
 
+DATE_FORMATS = [
+    "%d-%m-%y",
+    "%-d-%m-%y",
+    "%d-%-m-%y",
+    "%-d-%-m-%y",
+    "%d-%m-%Y",
+    "%-d-%m-%Y",
+    "%d-%-m-%Y",
+    "%-d-%-m-%Y",
+    "%d/%m/%y",
+    "%-d/%m/%y",
+    "%d/%-m/%y",
+    "%-d/%-m/%y",
+    "%d/%m/%Y",
+    "%-d/%m/%Y",
+    "%d/%-m/%Y",
+    "%-d/%-m/%Y",
+]
 
 try:
     import winsound
@@ -39,6 +57,15 @@ else:
     def beep(freq, duration):
         winsound.Beep(freq, duration)
 
+
+def rotate_date_format(start_date):
+    global rotation_counter
+    date = datetime.datetime.strptime(start_date, "%d-%m-%Y")
+    strftime = date.strftime(DATE_FORMATS[rotation_counter])
+    rotation_counter += 1
+    if rotation_counter >= len(DATE_FORMATS):
+        rotation_counter = 0
+    return strftime
 
 def correct_schema(sessions):
     centers = {}
@@ -116,7 +143,7 @@ def checkCalenderByDistrict(
 
         for location in location_dtls:
             resp = requests.get(
-                base_url.format(location["district_id"], start_date),
+                base_url.format(location["district_id"], rotate_date_format(start_date) if find_option == 1 else start_date),
                 headers=request_header,
             )
 
@@ -212,8 +239,7 @@ def checkCalenderByPincode(
 
         for location in location_dtls:
             resp = requests.get(
-                base_url.format(location["pincode"], start_date),
-                headers=request_header,
+                base_url.format(location["pincode"], rotate_date_format(start_date) if find_option == 1 else start_date), headers=request_header
             )
 
             if resp.status_code == 403 or resp.status_code == 429:
