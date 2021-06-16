@@ -8,9 +8,9 @@ BooKie is a automated python script which lets you book vaccination slots and do
 1. Search for vaccination availability
 2. Validate OTP manually or automatically 
 3. Filter the search by 
-	(i).  Pincode
-	(ii). District
-	(iii). District with pincodes (users can input the pincodes to be searched under a specific district)
+   1. Pincode
+   2. District
+   3. District with pincodes (users can input the pincodes to be searched under a specific district)
 3. Search for a week & search for single day
 4. Search by vaccine preference
 5. Search by fee type
@@ -58,6 +58,7 @@ Environment Variable | Description
 KVDB_BUCKET | kvdb.io bucket key
 
 ### Pro-Tip
+Always use single-day search option to avoid getting rate-limited
 #### Protected API Search
 Using this option would require user to login. So make sure the slot opening times are known (refer to Telegram alerts history). 
 NOTE:Do not run this for hours or else your account might get blocked
