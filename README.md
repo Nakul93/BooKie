@@ -3,25 +3,30 @@
 
 BooKie is a automated python script which lets you book vaccination slots and download appointment slips for the same.
 
-## Table of Contents:
+## Features
 
- <ol>
-    <li><a href="#introduction">Introduction</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#getting-started">Getting Started</a></li>
-    <li><a href="#how-to-use">How to Use</a></li>
-    <li><a href="#working-screenshots">Working Screenshots</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#team-members">Team Members</a></li>
-    <li><a href="#important">Important</a></li>
-
-  </ol>
+1. Search for vaccination availability
+2. Validate OTP manually or automatically 
+3. Filter the search by 
+	(i).  Pincode
+	(ii). District
+	(iii). District with pincodes (users can input the pincodes to be searched under a specific district)
+3. Search for a week & search for single day
+4. Search by vaccine preference
+5. Search by fee type
+6. Public API & Protected API search
+7. Set refresh frequency between each search
+8. Automatically sets dose2 due date for partially vaccinated
+9. Auto-book option which selects random centre and slots for fast booking
+10. Saves a json configuration file of all the user preferences 
+11. Downloads appointment slip
+12. Search without login(SWL): It searches for the slots according to the json config file without logging in and only on detecting a slot it will trigger a OTP       (auto-OTP) and books the slots(if auto-book option is enabled)
+	
 
 ## Guide
 ### Pre-requisites
 1. [Setup on Windows/Linux/MacOS/Docker/AWS](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/Setup) (Required)
-2. [KVDB Bucket](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/KVDB)
+2. [KVDB Bucket](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/KVDB) for automatic OTP validation
 3. Phone Setup
 	1. Android
 	   1. [CoWIN OTP Retriever](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/CoWIN-OTP-Retriever) (Recommended)
@@ -30,7 +35,11 @@ BooKie is a automated python script which lets you book vaccination slots and do
 	
 ### Usage
 
-`./covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
+#### For Mac
+` python3 src/covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
+
+#### For Windows
+` python src/covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
 
 This very basic CLI based script can be used to automate covid vaccination slot booking on Co-WIN Platform.
 
@@ -46,8 +55,16 @@ Parameter | Description
 
 Environment Variable | Description
 ------------ | -------------
-BEEP | Setting `no` skips beeps
 KVDB_BUCKET | kvdb.io bucket key
+
+### Pro-Tip
+#### Protected API Search
+Using this option would require user to login. So make sure the slot opening times are known (refer to Telegram alerts history). 
+NOTE:Do not run this for hours or else your account might get blocked
+
+#### Public API Search (used for SWL)
+This option can be used when the slot opening times are random/unknown. Since this option doesn't require login it can be run for a long time
+
 
 
 ## Contents
