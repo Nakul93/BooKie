@@ -222,7 +222,7 @@ def collectUserDetails(base_request_header,token_service):
     pin_code_location_dtls = []
     if search_option == 3:
         location_dtls = getDistricts(base_request_header)
-        pin_code_location_dtls = get_pincodes()
+        pin_code_location_dtls = getPincodes()
     elif search_option == 2:
         # Collect vaccination center preference
         location_dtls = getDistricts(base_request_header)
