@@ -36,10 +36,10 @@ BooKie is a automated python script which lets you book vaccination slots and do
 ### Usage
 
 #### For Mac
-` python3 src/covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
+` python3 BooKie.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
 
 #### For Windows
-` python src/covid-vaccine-slot-booking.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
+` python BooKie.py [--mobile <mobile_no>] [--token <token>] [--kvdb-bucket <kvdb_bucket_key] [--config <path_to_config] [--no-tty]`
 
 This very basic CLI based script can be used to automate covid vaccination slot booking on Co-WIN Platform.
 
