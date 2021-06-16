@@ -25,7 +25,7 @@ BooKie is a automated python script which lets you book vaccination slots and do
 
 ## Guide
 ### Pre-requisites
-1. [Setup on Windows/Linux/MacOS/Docker/AWS](https://github.com/Nakul93/BooKie/wiki/Setup) (Required)
+1. [Setup on Windows/Linux/MacOS](https://github.com/Nakul93/BooKie/wiki/Setup) (Required)
 2. [KVDB Bucket](https://github.com/Nakul93/BooKie/wiki/KVDB) for automatic OTP validation
 3. Phone Setup
 	1. Android
