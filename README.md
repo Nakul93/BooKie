@@ -25,13 +25,13 @@ BooKie is a automated python script which lets you book vaccination slots and do
 
 ## Guide
 ### Pre-requisites
-1. [Setup on Windows/Linux/MacOS/Docker/AWS](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/Setup) (Required)
-2. [KVDB Bucket](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/KVDB) for automatic OTP validation
+1. [Setup on Windows/Linux/MacOS/Docker/AWS](https://github.com/Nakul93/BooKie/wiki/Setup) (Required)
+2. [KVDB Bucket](https://github.com/Nakul93/BooKie/wiki/KVDB) for automatic OTP validation
 3. Phone Setup
 	1. Android
-	   1. [CoWIN OTP Retriever](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/CoWIN-OTP-Retriever) (Recommended)
+	   1. [CoWIN OTP Retriever](https://github.com/Nakul93/BooKie/wiki/CoWIN-OTP-Retriever) (Recommended)
 	   2. [IFTTT](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/IFTTT)
-	2. [iPhone](https://github.com/bombardier-gif/covid-vaccine-booking/wiki/Shortcuts)
+	2. [iPhone](https://github.com/Nakul93/BooKie/wiki/Shortcuts-for-iOS)
 	
 ### Usage
 
