@@ -19,10 +19,7 @@ import requests
 from utils.ratelimit import *
 from utils.appointment import checkAndBook
 from utils.displayData import displayInfoDict
-from utils.generateOTP import (
-generateTokenOTP,
-generate_token_OTP_manual,
-)
+
 from utils.otp import (
     ManualTokenService,
     AutoTokenService, JustInTimeAutoTokenService
@@ -37,7 +34,7 @@ from utils.userInfo import (
     get_dose_num,
 )
 from utils.getData import fetch_beneficiaries
-init(convert=True)
+colorama.init(convert=True)
 
 
 
